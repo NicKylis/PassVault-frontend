@@ -1,9 +1,5 @@
 import { useEffect } from "react";
-import {
-  useForm,
-  Controller,
-  type UseFormRegisterReturn,
-} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { PasswordEntity } from "@/types/Passwords";
@@ -15,8 +11,15 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input as ShadcnInput } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -26,14 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Zap } from "lucide-react";
-import React from "react";
 import { toast } from "sonner";
-
-// Forward ref wrapper for Input
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  (props, ref) => <ShadcnInput ref={ref} {...props} />
-);
-Input.displayName = "Input";
 
 // Zod schema
 const passwordSchema = z.object({
@@ -68,14 +64,7 @@ export const NewPasswordModal = ({
   onSave,
   editingPassword,
 }: NewPasswordModalProps) => {
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<PasswordFormData>({
+  const form = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
       title: "",
@@ -90,7 +79,7 @@ export const NewPasswordModal = ({
   });
 
   useEffect(() => {
-    reset(
+    form.reset(
       editingPassword
         ? {
             title: editingPassword.title,
@@ -116,13 +105,13 @@ export const NewPasswordModal = ({
             notes: "",
           }
     );
-  }, [editingPassword, isOpen, reset]);
+  }, [editingPassword, isOpen, form]);
 
   // Generate password
   const generatePassword = () => {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-    setValue(
+    form.setValue(
       "password",
       Array.from({ length: 16 }, () =>
         chars.charAt(Math.floor(Math.random() * chars.length))
@@ -141,33 +130,6 @@ export const NewPasswordModal = ({
     }
   };
 
-  const renderField = (
-    id: string,
-    label: string,
-    registerProps: UseFormRegisterReturn,
-    error?: string,
-    type = "text",
-    placeholder = "",
-    extra?: React.ReactNode
-  ) => (
-    <div>
-      <Label htmlFor={id} className="pb-2">
-        {label}
-      </Label>
-      <div className="flex space-x-2">
-        <Input
-          id={id}
-          type={type}
-          {...registerProps}
-          className="bg-primary-foreground border-ring flex-1 min-w-0"
-          placeholder={placeholder}
-        />
-        {extra}
-      </div>
-      {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
-    </div>
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
@@ -185,115 +147,153 @@ export const NewPasswordModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {renderField(
-            "title",
-            "Title *",
-            register("title"),
-            errors.title?.message,
-            "text",
-            "e.g., Google Account"
-          )}
-
-          {renderField(
-            "website",
-            "Website",
-            register("website"),
-            errors.website?.message,
-            "text",
-            "e.g., https://google.com"
-          )}
-
-          {renderField(
-            "username",
-            "Username/Email *",
-            register("username"),
-            errors.username?.message,
-            "text",
-            "your@email.com"
-          )}
-
-          {renderField(
-            "password",
-            "Password *",
-            register("password"),
-            errors.password?.message,
-            "text",
-            "",
-            <Button
-              type="button"
-              onClick={generatePassword}
-              className="bg-blue-600 hover:bg-blue-700 shrink-0"
-              size="sm"
-            >
-              <Zap className="w-4 h-4" />
-            </Button>
-          )}
-
-          <div>
-            <Label htmlFor="category" className="pb-2">
-              Category
-            </Label>
-            <Controller
-              control={control}
-              name="category"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="bg-primary-foreground border-ring text-muted-foreground">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-primary-foreground border-ring text-muted-foreground">
-                    <SelectItem value="Social Media">Social Media</SelectItem>
-                    <SelectItem value="Email">Email</SelectItem>
-                    <SelectItem value="Banking">Banking</SelectItem>
-                    <SelectItem value="ECommerce">ECommerce</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormItem>
+                  <FormLabel>Title *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Google Account"
+                      className="bg-primary-foreground border-ring"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            {errors.category && (
-              <p className="text-red-600 text-sm mt-1">
-                {errors.category.message}
-              </p>
-            )}
-          </div>
 
-          <div>
-            <Label htmlFor="notes" className="pb-2">
-              Notes
-            </Label>
-            <Textarea
-              id="notes"
-              {...register("notes")}
-              className="bg-primary-foreground border-ring"
-              placeholder="Additional notes..."
-              rows={3}
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., https://google.com"
+                      className="bg-primary-foreground border-ring"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.notes && (
-              <p className="text-red-600 text-sm mt-1">
-                {errors.notes.message}
-              </p>
-            )}
-          </div>
 
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="border-ring cursor-pointer"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
-            >
-              {editingPassword ? "Update" : "Save"}
-            </Button>
-          </div>
-        </form>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username/Email *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="your@email.com"
+                      className="bg-primary-foreground border-ring"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password *</FormLabel>
+                  <div className="flex space-x-2">
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder=""
+                        className="bg-primary-foreground border-ring flex-1 min-w-0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      onClick={generatePassword}
+                      className="bg-blue-600 hover:bg-blue-700 shrink-0"
+                      size="sm"
+                    >
+                      <Zap className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="bg-primary-foreground border-ring text-muted-foreground">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-primary-foreground border-ring text-muted-foreground">
+                      <SelectItem value="Social Media">Social Media</SelectItem>
+                      <SelectItem value="Email">Email</SelectItem>
+                      <SelectItem value="Banking">Banking</SelectItem>
+                      <SelectItem value="ECommerce">ECommerce</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Additional notes..."
+                      className="bg-primary-foreground border-ring"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="border-ring cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              >
+                {editingPassword ? "Update" : "Save"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

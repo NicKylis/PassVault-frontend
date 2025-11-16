@@ -23,6 +23,13 @@ const PasswordContext = createContext<PasswordContextType>({
 
 export const PasswordProvider = ({ children }: { children: ReactNode }) => {
   const [passwords, setPasswords] = useState<PasswordEntity[]>([]);
+  // Set auth header
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+  }, []);
 
   const fetchPasswords = async () => {
     try {

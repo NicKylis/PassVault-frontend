@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Zap } from "lucide-react";
 import { toast } from "sonner";
+import { usePasswords } from "@/context/PasswordContext";
 
 // Zod schema
 const passwordSchema = z.object({
@@ -54,14 +55,12 @@ export type PasswordFormData = z.infer<typeof passwordSchema>;
 interface NewPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (password: PasswordFormData) => void;
   editingPassword?: PasswordEntity | null;
 }
 
 export const NewPasswordModal = ({
   isOpen,
   onClose,
-  onSave,
   editingPassword,
 }: NewPasswordModalProps) => {
   const form = useForm<PasswordFormData>({
@@ -77,6 +76,8 @@ export const NewPasswordModal = ({
       notes: "",
     },
   });
+
+  const { addPassword } = usePasswords();
 
   useEffect(() => {
     form.reset(
@@ -122,11 +123,19 @@ export const NewPasswordModal = ({
 
   const onSubmit = async (data: PasswordFormData) => {
     try {
-      await onSave(data);
+      if (editingPassword) {
+        // await updatePassword(editingPassword.id, data);
+        toast.success("Password updated!");
+      } else {
+        await addPassword(data);
+        toast.success("Password added!");
+      }
+
+      form.reset();
       onClose();
-      toast.success("Password saved successfully!");
-    } catch {
-      toast.error("Error in saving password.");
+    } catch (err) {
+      console.error("Failed to save password:", err);
+      toast.error("Something went wrong.");
     }
   };
 

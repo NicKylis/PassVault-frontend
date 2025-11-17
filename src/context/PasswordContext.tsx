@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import type { ReactNode } from "react";
 import axios from "axios";
 import type { PasswordEntity } from "@/types/Passwords";
+import { useAuth } from "@/hooks/useAuth";
 
 type PasswordContextType = {
   passwords: PasswordEntity[];
@@ -22,6 +23,7 @@ const PasswordContext = createContext<PasswordContextType>({
 });
 
 export const PasswordProvider = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated } = useAuth();
   const [passwords, setPasswords] = useState<PasswordEntity[]>([]);
   // Set auth header
   useEffect(() => {
@@ -44,8 +46,12 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
 
   // Initial fetch
   useEffect(() => {
-    fetchPasswords();
-  }, []);
+    if (isAuthenticated) {
+      fetchPasswords(); // fetch only if logged in
+    } else {
+      setPasswords([]); // clear on logout
+    }
+  }, [isAuthenticated]);
 
   // Optimistic favorite toggle
   const toggleFavorite = async (id: string) => {

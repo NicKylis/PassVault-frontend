@@ -47,6 +47,7 @@ const passwordSchema = z.object({
   notes: z.string().optional(),
   favorite: z.boolean(),
   passwordStrength: z.enum(["Weak", "Good", "Strong"]),
+  shared: z.boolean(),
 });
 
 export type PasswordFormData = z.infer<typeof passwordSchema>;
@@ -74,6 +75,7 @@ export const NewPasswordModal = ({
       passwordStrength: "Weak",
       category: "Other",
       notes: "",
+      shared: false,
     },
   });
 
@@ -94,6 +96,7 @@ export const NewPasswordModal = ({
                 ? "Weak"
                 : editingPassword.passwordStrength,
             notes: editingPassword.notes || "",
+            shared: editingPassword.shared || false,
           }
         : {
             title: "",
@@ -104,6 +107,7 @@ export const NewPasswordModal = ({
             favorite: false,
             passwordStrength: "Weak",
             notes: "",
+            shared: false,
           }
     );
   }, [editingPassword, isOpen, form]);
@@ -230,7 +234,7 @@ export const NewPasswordModal = ({
                     <Button
                       type="button"
                       onClick={generatePassword}
-                      className="bg-blue-600 hover:bg-blue-700 shrink-0"
+                      className="shrink-0"
                       size="sm"
                     >
                       <Zap className="w-4 h-4" />
@@ -294,10 +298,7 @@ export const NewPasswordModal = ({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 cursor-pointer"
-              >
+              <Button type="submit" className="cursor-pointer">
                 {editingPassword ? "Update" : "Save"}
               </Button>
             </div>

@@ -28,7 +28,7 @@ const AppHeader = () => {
     <header className="flex flex-col md:flex-row items-start md:items-center justify-between py-2 px-4 md:py-3 md:px-6 bg-white border-b border-gray-200 gap-4">
       {/* Top row on mobile / left side on desktop */}
       <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-2">
-        <SidebarTrigger className="p-2 hover:bg-gray-100 rounded-full" />
+        <SidebarTrigger className="p-2 rounded-full" />
 
         {/* Mobile: */}
         <div className="flex md:hidden items-center space-x-4">
@@ -36,13 +36,13 @@ const AppHeader = () => {
             to="/notifications"
             className="p-2 hover:bg-gray-100 rounded-full"
           >
-            <Bell className="h-4 w-4 text-gray-700" />
+            <Bell className="h-4 w-4 " />
           </Link>
           <Link to="/settings" className="p-2 hover:bg-gray-100 rounded-full">
-            <Globe className="h-4 w-4 text-gray-700" />
+            <Globe className="h-4 w-4" />
           </Link>
           <Link to="/help" className="p-2 hover:bg-gray-100 rounded-full">
-            <Bot className="h-4 w-4 text-gray-700" />
+            <Bot className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -58,13 +58,13 @@ const AppHeader = () => {
           to="/notifications"
           className="p-2 hover:bg-gray-100 rounded-full"
         >
-          <Bell className="h-6 w-6 text-gray-700" />
+          <Bell className="h-6 w-6 " />
         </Link>
         <Link to="/lang" className="p-2 hover:bg-gray-100 rounded-full">
-          <Globe className="h-6 w-6 text-gray-700" />
+          <Globe className="h-6 w-6" />
         </Link>
         <Link to="/help" className="p-2 hover:bg-gray-100 rounded-full">
-          <Bot className="h-6 w-6 text-gray-700" />
+          <Bot className="h-6 w-6" />
         </Link>
 
         {/* User Menu */}

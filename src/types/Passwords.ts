@@ -11,10 +11,6 @@ export type PasswordEntity = {
   createdAt: Date;
   updatedAt: Date;
   lastUsedAt?: Date;
+  shared: boolean;
+  sharedRecordId?: string;
 };
-
-// Define type for creating new password (POST request)
-export type PasswordCreate = Omit<
-  PasswordEntity,
-  "id" | "createdAt" | "updatedAt"
->;

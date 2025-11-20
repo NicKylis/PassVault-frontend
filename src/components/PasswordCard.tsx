@@ -11,6 +11,7 @@ import {
   Edit,
   Link,
   Trash2,
+  Plus,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,13 +21,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 const PasswordCard = (password: PasswordEntity) => {
   const [visible, setVisible] = useState(true);
+  const [shareEmails, setShareEmails] = useState<Record<string, string[]>>({});
 
   const {
     toggleFavorite,
@@ -57,8 +64,39 @@ const PasswordCard = (password: PasswordEntity) => {
   };
 
   const handleShare = async () => {
-    const email = prompt("Enter email to share with:");
-    if (email) await sharePassword(password.id, email);
+    const emails = (shareEmails[password.id] || [])
+      .map((e) => e.trim())
+      .filter(Boolean);
+    if (emails.length === 0) return;
+
+    try {
+      // Call context sharePassword with array of emails
+      const res = await sharePassword(password.id, emails);
+
+      // Since your context already shows toasts for each email, here we handle dropdown behavior
+      const failedEmails =
+        res?.filter((r) => r.status === "failed").map((r) => r.email) || [];
+
+      if (failedEmails.length > 0) {
+        // Keep only failed emails in input
+        setShareEmails((prev) => ({
+          ...prev,
+          [password.id]: failedEmails,
+        }));
+
+        toast.error(`Cannot share with: ${failedEmails.join(", ")}`);
+      } else {
+        // Success: reset emails and close menu
+        setShareEmails((prev) => ({
+          ...prev,
+          [password.id]: [""],
+        }));
+        toast.success("Added users successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to share password");
+    }
   };
 
   const handleDelete = async () => {
@@ -66,6 +104,13 @@ const PasswordCard = (password: PasswordEntity) => {
       if (password.shared) await removeSharedPassword(password);
       else await deletePassword(password.id);
     }
+  };
+
+  const addEmailField = (id: string) => {
+    setShareEmails((prev) => ({
+      ...prev,
+      [id]: [...(prev[id] || [""]), ""],
+    }));
   };
 
   const strengthIcon = {
@@ -97,7 +142,16 @@ const PasswordCard = (password: PasswordEntity) => {
               </button>
 
               {/* Dropdown menu */}
-              <DropdownMenu>
+              <DropdownMenu
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setShareEmails((prev) => ({
+                      ...prev,
+                      [password.id]: [""],
+                    }));
+                  }
+                }}
+              >
                 <DropdownMenuTrigger>
                   <Button
                     variant="ghost"
@@ -117,7 +171,7 @@ const PasswordCard = (password: PasswordEntity) => {
                       onClick={handleDelete}
                       className="cursor-pointer"
                     >
-                      <Trash2 className="mr-2 h-4 w-4 text-black" />
+                      <Trash2 className="mr-2 h-4 w-4 text-red" />
                       <span>Delete</span>
                     </DropdownMenuItem>
                   ) : (
@@ -126,17 +180,62 @@ const PasswordCard = (password: PasswordEntity) => {
                         onClick={handleEdit}
                         className="cursor-pointer"
                       >
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className="mr-2 h-4 w-4 text-foreground" />
                         <span>Edit</span>
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem
-                        onClick={handleShare}
-                        className="cursor-pointer"
-                      >
-                        <Link className="mr-2 h-4 w-4" />
-                        <span>Share</span>
-                      </DropdownMenuItem>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer">
+                          <Link className="mr-4 h-4 w-4" />
+                          <span>Share</span>
+                        </DropdownMenuSubTrigger>
+
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent className="w-64 bg-popover z-50 p-3">
+                            <div className="space-y-2">
+                              {(shareEmails[password.id] || [""]).map(
+                                (email, index) => (
+                                  <Input
+                                    key={index}
+                                    type="email"
+                                    placeholder="Enter email"
+                                    value={email}
+                                    onChange={(e) =>
+                                      setShareEmails((prev) => ({
+                                        ...prev,
+                                        [password.id]: (
+                                          prev[password.id] || [""]
+                                        ).map((em, i) =>
+                                          i === index ? e.target.value : em
+                                        ),
+                                      }))
+                                    }
+                                    className="w-full"
+                                  />
+                                )
+                              )}
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addEmailField(password.id)}
+                                className="w-full cursor-pointer"
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add more
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                className="w-full"
+                                onClick={handleShare}
+                              >
+                                Share
+                              </Button>
+                            </div>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
 
                       <DropdownMenuSeparator />
 
@@ -144,7 +243,7 @@ const PasswordCard = (password: PasswordEntity) => {
                         onClick={handleDelete}
                         className="cursor-pointer text-destructive focus:text-destructive"
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="mr-2 h-4 w-4 text-red" />
                         <span>Delete</span>
                       </DropdownMenuItem>
                     </>

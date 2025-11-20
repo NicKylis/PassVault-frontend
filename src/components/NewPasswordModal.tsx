@@ -43,7 +43,7 @@ const passwordSchema = z.object({
     .refine((val) => !val || /^https?:\/\/.+\..+/.test(val), {
       message: "Enter a valid URL (https://example.com)",
     }),
-  category: z.enum(["Social Media", "Email", "Banking", "ECommerce", "Other"]),
+  category: z.enum(["Email", "Social Media", "Banking", "ECommerce", "Other"]),
   notes: z.string().optional(),
   favorite: z.boolean(),
   passwordStrength: z.enum(["Weak", "Good", "Strong"]),
@@ -258,8 +258,8 @@ export const NewPasswordModal = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-primary-foreground border-ring text-muted-foreground">
-                      <SelectItem value="Social Media">Social Media</SelectItem>
                       <SelectItem value="Email">Email</SelectItem>
+                      <SelectItem value="Social Media">Social Media</SelectItem>
                       <SelectItem value="Banking">Banking</SelectItem>
                       <SelectItem value="ECommerce">ECommerce</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>

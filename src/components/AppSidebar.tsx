@@ -43,7 +43,7 @@ const items = [
   { title: "Dashboard", url: "/", icon: GaugeCircle },
   { title: "Favorites", url: "/view-all?filter=favorites", icon: Star },
   { title: "View All", url: "/view-all", icon: Layers },
-  { title: "Shared Passwords", url: "/shared-passwords", icon: Linker },
+  { title: "Shared Passwords", url: "/view-all?filter=shared", icon: Linker },
 ];
 
 const accountItems = [

@@ -4,7 +4,7 @@ Passvault is a password manager application developed for the second course
 of Software Engineering at the Aristotle University of Thessaloniki. The frontend
 of the application is developed with Typescript, React and Vite.
 
-## PREREQUISITES (for backend)
+## PREREQUISITES (for frontend)
 
 - nodejs npm
 - typescript

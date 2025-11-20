@@ -5,16 +5,14 @@ import WhatsNew from "@/components/WhatsNew";
 import { SearchContext } from "./Layout";
 import { usePasswords } from "@/context/PasswordContext";
 import { Button } from "@/components/ui/button";
-import {
-  NewPasswordModal,
-  type PasswordFormData,
-} from "@/components/NewPasswordModal";
+import { NewPasswordModal } from "@/components/NewPasswordModal";
 import { Plus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const { query } = useContext(SearchContext);
   const { passwords } = usePasswords();
-  const { addPassword } = usePasswords();
+  const user = useAuth().user;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filtered = query
@@ -32,10 +30,6 @@ const Dashboard = () => {
         new Date(b.lastUsedAt!).getTime() - new Date(a.lastUsedAt!).getTime()
     )
     .slice(0, 3);
-
-  const handleAddPassword = async (password: PasswordFormData) => {
-    await addPassword(password);
-  };
 
   if (query) {
     return (
@@ -59,7 +53,9 @@ const Dashboard = () => {
   return (
     <div className="flex-1 pt-4 px-3 md:px-6 space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-3xl sm:text-4xl font-semibold">Welcome, John!</h1>
+        <h1 className="text-3xl sm:text-4xl font-semibold">
+          Welcome, {user?.name}
+        </h1>
         <Button
           className="bg-primary hover:primary-hover w-full sm:w-auto text-white"
           onClick={() => setIsModalOpen(true)}
@@ -72,7 +68,6 @@ const Dashboard = () => {
       <NewPasswordModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={handleAddPassword}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">

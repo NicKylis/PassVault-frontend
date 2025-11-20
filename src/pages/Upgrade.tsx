@@ -10,10 +10,10 @@ const Upgrade = () => {
       price: "$0",
       description: "Perfect for getting started",
       features: [
-        "Up to 3 projects",
+        "Up to 8 passwords",
         "Basic features",
         "Community support",
-        "1GB storage",
+        "End-to-end encryption",
       ],
       cta: "Current Plan",
       variant: "outline" as const,
@@ -21,17 +21,14 @@ const Upgrade = () => {
     },
     {
       name: "Pro",
-      price: "$29",
+      price: "$5",
       period: "/month",
       description: "For professionals and growing teams",
       features: [
-        "Unlimited projects",
+        "Unlimited passwords",
         "Advanced features",
         "Priority support",
-        "50GB storage",
-        "Custom domain",
-        "Analytics dashboard",
-        "API access",
+        "Advanced security",
       ],
       cta: "Upgrade to Pro",
       variant: "default" as const,
@@ -43,11 +40,7 @@ const Upgrade = () => {
       description: "For large organizations",
       features: [
         "Everything in Pro",
-        "Unlimited storage",
         "24/7 dedicated support",
-        "Custom integrations",
-        "SLA guarantee",
-        "Advanced security",
         "Team management",
         "Audit logs",
       ],
@@ -62,7 +55,7 @@ const Upgrade = () => {
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
         <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-secondary bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4 bg-primary bg-clip-text text-transparent">
             Choose Your Plan
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -91,7 +84,7 @@ const Upgrade = () => {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-primary border-0 text-primary-foreground">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary border-0 text-primary-foreground">
                     Most Popular
                   </Badge>
                 )}

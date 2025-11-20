@@ -20,10 +20,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useLocation, Link, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  Link,
+  useSearchParams,
+  useNavigate,
+} from "react-router-dom";
 import { CategoryList } from "@/types/CategoryList";
-import logo from "../assets/logo.png";
+import logo from "/logo.png";
 import { type ElementType } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
 
 type SidebarItem = {
   title: string;
@@ -36,19 +43,21 @@ const items = [
   { title: "Dashboard", url: "/", icon: GaugeCircle },
   { title: "Favorites", url: "/view-all?filter=favorites", icon: Star },
   { title: "View All", url: "/view-all", icon: Layers },
-  { title: "Shared Passwords", url: "/shared-passwords", icon: Linker },
+  { title: "Shared Passwords", url: "/view-all?filter=shared", icon: Linker },
 ];
 
 const accountItems = [
   { title: "Upgrade", url: "/upgrade", icon: Sparkles },
   { title: "Contact Us", url: "/contact", icon: Phone },
   { title: "Account Settings", url: "/settings", icon: Settings },
-  { title: "Logout", url: "/auth", icon: LogOut },
+  { title: "Logout", url: "", icon: LogOut, action: true },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const activeCategory = searchParams.get("category");
   const filter = searchParams.get("filter");
 
@@ -62,6 +71,12 @@ export function AppSidebar() {
     return Boolean(item.url && location.pathname === item.url);
   };
 
+  const handleLogout = () => {
+    delete axios.defaults.headers.common["Authorization"];
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   // Render menu items
   const renderMenuItems = (menu: SidebarItem[]) =>
     menu.map((item) => (
@@ -72,13 +87,24 @@ export function AppSidebar() {
             isActive={isItemActive(item)}
             className="flex items-center gap-2 w-full text-left"
           >
-            <button
-              type="button"
-              className="flex items-center gap-2 w-full cursor-pointer"
-            >
-              <item.icon />
-              <span>{item.title}</span>
-            </button>
+            {item.title === "Logout" ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full cursor-pointer text-left"
+              >
+                <item.icon />
+                <span>{item.title}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="flex items-center gap-2 w-full cursor-pointer"
+              >
+                <item.icon />
+                <span>{item.title}</span>
+              </button>
+            )}
           </SidebarMenuButton>
         ) : (
           <SidebarMenuButton asChild isActive={isItemActive(item)}>

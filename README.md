@@ -1,4 +1,35 @@
-# React + TypeScript + Vite
+# PassVault frontend
+
+Passvault is a password manager application developed for the second course
+of Software Engineering at the Aristotle University of Thessaloniki. The frontend
+of the application is developed with Typescript, React and Vite.
+
+## PREREQUISITES (for frontend)
+
+- nodejs npm
+- typescript
+
+## Installing and running Passvault's frontend as a developer
+
+- clone the repository:
+
+```
+git clone git@github.com:NicKylis/PassVault-frontend.git
+```
+
+- install the node modules with:
+
+```
+npm i
+```
+
+- start the backend with:
+
+```
+npm run dev
+```
+
+### React + TypeScript + Vite template information
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
@@ -7,7 +38,7 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+#### Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 

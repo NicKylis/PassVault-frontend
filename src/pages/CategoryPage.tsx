@@ -17,6 +17,8 @@ const CategoryPage = () => {
     filtered = filtered.filter(
       (p) => p.category.toLowerCase() === category.toLowerCase()
     );
+  } else if (filter === "shared") {
+    filtered = passwords.filter((p) => p.shared);
   }
 
   // Page title logic

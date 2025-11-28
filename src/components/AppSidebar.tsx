@@ -68,6 +68,7 @@ export function AppSidebar() {
         location.pathname === item.url && !activeCategory && !filter
       );
     if (item.title === "Favorites") return Boolean(filter === "favorites");
+    if (item.title === "Shared Passwords") return Boolean(filter === "shared");
     return Boolean(item.url && location.pathname === item.url);
   };
 

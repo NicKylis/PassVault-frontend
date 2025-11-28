@@ -12,8 +12,9 @@ import {
   Link,
   Trash2,
   Plus,
+  User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { usePasswords } from "@/context/PasswordContext";
 import type { PasswordEntity } from "@/types/Passwords";
@@ -30,19 +31,45 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { NewPasswordModal } from "./NewPasswordModal";
 
 const PasswordCard = (password: PasswordEntity) => {
   const [visible, setVisible] = useState(true);
   const [shareEmails, setShareEmails] = useState<Record<string, string[]>>({});
+  const [sharedUsers, setSharedUsers] = useState<
+    { email: string; name: string }[]
+  >([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const {
     toggleFavorite,
     markUsed,
-    editPassword,
     sharePassword,
     deletePassword,
     removeSharedPassword,
+    getSharedUsers,
   } = usePasswords();
+
+  useEffect(() => {
+    const fetchSharedUsers = async () => {
+      if (!password.shared) {
+        try {
+          const users = await getSharedUsers(password.id);
+          setSharedUsers(
+            users.map((u) => ({
+              email: u.sharedWithId.email,
+              name: u.sharedWithId.name,
+            }))
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    fetchSharedUsers();
+  }, [password.id, password.shared, getSharedUsers, password]);
 
   // Copy handler
   const handleCopy = async (value: string, label: string) => {
@@ -54,13 +81,6 @@ const PasswordCard = (password: PasswordEntity) => {
       console.error(err);
       toast.error(`Failed to copy ${label}`);
     }
-  };
-
-  // Menu action handlers
-  const handleEdit = async () => {
-    // Example: prompt for new title (replace with modal in real app)
-    const newTitle = prompt("Edit title:", password.title);
-    if (newTitle) await editPassword(password.id, { title: newTitle });
   };
 
   const handleShare = async () => {
@@ -122,123 +142,58 @@ const PasswordCard = (password: PasswordEntity) => {
   );
 
   return (
-    <Card className="bg-white shadow-md relative">
-      <CardHeader className="h-3">
-        <CardTitle>
-          <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-2">
-              <span className="text-xl">{password.title}</span>
-            </div>
-            <div className="inline-flex items-center gap-2 relative">
-              <button
-                className="cursor-pointer"
-                onClick={() => toggleFavorite(password)}
-              >
-                <Star
-                  className="w-5 h-5"
-                  color={password.favorite ? "#FFEB3A" : undefined}
-                  fill={password.favorite ? "#FFEB3A" : "none"}
-                />
-              </button>
-
-              {/* Dropdown menu */}
-              <DropdownMenu
-                onOpenChange={(open) => {
-                  if (!open) {
-                    setShareEmails((prev) => ({
-                      ...prev,
-                      [password.id]: [""],
-                    }));
-                  }
-                }}
-              >
-                <DropdownMenuTrigger>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-secondary"
-                  >
-                    <Ellipsis className="h-5 w-5" />
-                    <span className="sr-only">Open menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-48 bg-popover z-50"
+    <>
+      <NewPasswordModal
+        isOpen={isModalOpen}
+        editingPassword={password}
+        onClose={() => {
+          setIsModalOpen(false);
+        }}
+      />
+      <Card className="bg-white shadow-md relative hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+        <CardHeader className="h-3">
+          <CardTitle>
+            <div className="flex items-center justify-between">
+              <div className="inline-flex items-center gap-2">
+                <span className="text-xl">{password.title}</span>
+              </div>
+              <div className="inline-flex items-center gap-2 relative">
+                <button
+                  className="cursor-pointer"
+                  onClick={() => toggleFavorite(password)}
                 >
-                  {password.shared ? (
-                    <DropdownMenuItem
-                      onClick={handleDelete}
-                      className="cursor-pointer"
+                  <Star
+                    className="w-5 h-5"
+                    color={password.favorite ? "#FFEB3A" : undefined}
+                    fill={password.favorite ? "#FFEB3A" : "none"}
+                  />
+                </button>
+
+                {/* Dropdown menu */}
+                <DropdownMenu
+                  open={dropdownOpen}
+                  onOpenChange={(open) => {
+                    setDropdownOpen(open);
+                    if (!open) {
+                      setShareEmails((prev) => ({
+                        ...prev,
+                        [password.id]: [""],
+                      }));
+                    }
+                  }}
+                >
+                  <DropdownMenuTrigger>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-secondary"
                     >
-                      <Trash2 className="mr-2 h-4 w-4 text-red" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  ) : (
-                    <>
-                      <DropdownMenuItem
-                        onClick={handleEdit}
-                        className="cursor-pointer"
-                      >
-                        <Edit className="mr-2 h-4 w-4 text-foreground" />
-                        <span>Edit</span>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="cursor-pointer">
-                          <Link className="mr-4 h-4 w-4" />
-                          <span>Share</span>
-                        </DropdownMenuSubTrigger>
-
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent className="w-64 bg-popover z-50 p-3">
-                            <div className="space-y-2">
-                              {(shareEmails[password.id] || [""]).map(
-                                (email, index) => (
-                                  <Input
-                                    key={index}
-                                    type="email"
-                                    placeholder="Enter email"
-                                    value={email}
-                                    onChange={(e) =>
-                                      setShareEmails((prev) => ({
-                                        ...prev,
-                                        [password.id]: (
-                                          prev[password.id] || [""]
-                                        ).map((em, i) =>
-                                          i === index ? e.target.value : em
-                                        ),
-                                      }))
-                                    }
-                                    className="w-full"
-                                  />
-                                )
-                              )}
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => addEmailField(password.id)}
-                                className="w-full cursor-pointer"
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add more
-                              </Button>
-
-                              <Button
-                                size="sm"
-                                className="w-full"
-                                onClick={handleShare}
-                              >
-                                Share
-                              </Button>
-                            </div>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-
-                      <DropdownMenuSeparator />
-
+                      <Ellipsis className="h-5 w-5" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-popover">
+                    {password.shared ? (
                       <DropdownMenuItem
                         onClick={handleDelete}
                         className="cursor-pointer text-destructive focus:text-destructive"
@@ -246,56 +201,172 @@ const PasswordCard = (password: PasswordEntity) => {
                         <Trash2 className="mr-2 h-4 w-4 text-red" />
                         <span>Delete</span>
                       </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    ) : (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            setIsModalOpen(true);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="mr-2 h-4 w-4 text-foreground" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <Link className="mr-4 h-4 w-4" />
+                            <span>Share</span>
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent className="w-64 bg-popover z-50 p-3">
+                              <div className="space-y-2">
+                                {(shareEmails[password.id] || [""]).map(
+                                  (email, index) => (
+                                    <Input
+                                      key={index}
+                                      type="email"
+                                      placeholder="Enter email"
+                                      value={email}
+                                      onChange={(e) =>
+                                        setShareEmails((prev) => ({
+                                          ...prev,
+                                          [password.id]: (
+                                            prev[password.id] || [""]
+                                          ).map((em, i) =>
+                                            i === index ? e.target.value : em
+                                          ),
+                                        }))
+                                      }
+                                      className="w-full"
+                                    />
+                                  )
+                                )}
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => addEmailField(password.id)}
+                                  className="w-full cursor-pointer"
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add more
+                                </Button>
+
+                                <Button
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={handleShare}
+                                >
+                                  Share
+                                </Button>
+                              </div>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger className="cursor-pointer">
+                            <User className="mr-4 h-4 w-4" />
+                            <span>Users</span>
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuPortal>
+                            <DropdownMenuSubContent className="w-48 bg-popover z-50">
+                              {sharedUsers.length > 0 ? (
+                                sharedUsers.map((user) => (
+                                  <DropdownMenuItem
+                                    key={user.email}
+                                    className="cursor-default"
+                                  >
+                                    <User className="h-4 w-4" />
+                                    <span>{user.email}</span>
+                                  </DropdownMenuItem>
+                                ))
+                              ) : (
+                                <DropdownMenuItem className="cursor-default">
+                                  No users
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={handleDelete}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4 text-red" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <div className="text-md text-muted-foreground mb-1">Username:</div>
+          <div className="flex items-center gap-2">
+            <div className="text-md font-semibold">{password.username}</div>
+            <button
+              className="cursor-pointer"
+              onClick={() => handleCopy(password.username, "Username")}
+            >
+              <Copy className="inline h-4" />
+            </button>
           </div>
-        </CardTitle>
-      </CardHeader>
 
-      <CardContent>
-        <div className="text-md text-muted-foreground mb-1">Username:</div>
-        <div className="flex items-center gap-2">
-          <div className="text-md font-semibold">{password.username}</div>
-          <button
-            className="cursor-pointer"
-            onClick={() => handleCopy(password.username, "Username")}
-          >
-            <Copy className="inline h-4" />
-          </button>
-        </div>
-
-        <div className="text-md text-muted-foreground">Password:</div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-2">
-            <span className="text-md font-semibold">
-              {visible
-                ? "•".repeat(password.password.length)
-                : password.password}
+          <div className="text-md text-muted-foreground">Password:</div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-2">
+              <span className="text-md font-semibold">
+                {visible
+                  ? "•".repeat(password.password.length)
+                  : password.password}
+              </span>
+              <button
+                className="cursor-pointer"
+                onClick={() => setVisible(!visible)}
+              >
+                {visible ? (
+                  <Eye className="inline h-4" />
+                ) : (
+                  <EyeOff className="inline h-4" />
+                )}
+              </button>
             </span>
             <button
               className="cursor-pointer"
-              onClick={() => setVisible(!visible)}
+              onClick={() => handleCopy(password.password, "Password")}
             >
-              {visible ? (
-                <Eye className="inline h-4" />
-              ) : (
-                <EyeOff className="inline h-4" />
-              )}
+              <Copy className="inline h-4" />
             </button>
-          </span>
-          <button
-            className="cursor-pointer"
-            onClick={() => handleCopy(password.password, "Password")}
-          >
-            <Copy className="inline h-4" />
-          </button>
-        </div>
-        <div>{strengthIcon}</div>
-      </CardContent>
-    </Card>
+          </div>
+          <div>{strengthIcon}</div>
+          {sharedUsers.length > 0 && (
+            <div className="absolute bottom-2 right-2 flex -space-x-2">
+              {sharedUsers.slice(0, 3).map((user, idx) => (
+                <div
+                  key={idx}
+                  className="relative h-9 w-9 rounded-full bg-gray-200 hover:bg-gray-300 text-sm font-semibold text-gray-700 flex items-center justify-center border-2 border-white"
+                  title={user.name}
+                >
+                  {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                </div>
+              ))}
+              {sharedUsers.length > 3 && (
+                <div className="relative h-9 w-9 rounded-full bg-gray-200 hover:bg-gray-300 text-sm font-semibold text-gray-700 flex items-center justify-center border-2 border-white">
+                  +{sharedUsers.length - 3}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 };
 

@@ -79,7 +79,7 @@ export const NewPasswordModal = ({
     },
   });
 
-  const { addPassword } = usePasswords();
+  const { addPassword, editPassword } = usePasswords();
 
   useEffect(() => {
     form.reset(
@@ -116,19 +116,34 @@ export const NewPasswordModal = ({
   const generatePassword = () => {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-    form.setValue(
-      "password",
-      Array.from({ length: 16 }, () =>
-        chars.charAt(Math.floor(Math.random() * chars.length))
-      ).join(""),
-      { shouldValidate: true }
-    );
+    const generated = Array.from({ length: 16 }, () =>
+      chars.charAt(Math.floor(Math.random() * chars.length))
+    ).join("");
+    form.setValue("password", generated, { shouldValidate: true });
+    return generated;
   };
+
+  const evaluateStrength = (value: string) => {
+    if (!value) return "Weak";
+
+    let score = 0;
+
+    // Basic scoring logic
+    if (value.length >= 8) score++;
+    if (/[A-Z]/.test(value)) score++;
+    if (/[0-9]/.test(value)) score++;
+    if (/[^A-Za-z0-9]/.test(value)) score++; // special characters
+
+    if (score <= 1) return "Weak";
+    if (score <= 3) return "Good";
+    return "Strong";
+  };
+  const passwordStrength = form.watch("passwordStrength");
 
   const onSubmit = async (data: PasswordFormData) => {
     try {
       if (editingPassword) {
-        // await updatePassword(editingPassword.id, data);
+        await editPassword(editingPassword.id, data);
         toast.success("Password updated!");
       } else {
         await addPassword(data);
@@ -229,11 +244,25 @@ export const NewPasswordModal = ({
                         placeholder=""
                         className="bg-primary-foreground border-ring flex-1 min-w-0"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(e); // update form value
+                          form.setValue(
+                            "passwordStrength",
+                            evaluateStrength(e.target.value)
+                          );
+                        }}
                       />
                     </FormControl>
                     <Button
                       type="button"
-                      onClick={generatePassword}
+                      onClick={() => {
+                        const generated = generatePassword();
+                        field.onChange({ target: { value: generated } }); // update input
+                        form.setValue(
+                          "passwordStrength",
+                          evaluateStrength(generated)
+                        );
+                      }}
                       className="shrink-0"
                       size="sm"
                     >
@@ -244,6 +273,10 @@ export const NewPasswordModal = ({
                 </FormItem>
               )}
             />
+
+            <div className="mt-1 text-sm font-medium">
+              Strength: {passwordStrength}
+            </div>
 
             <FormField
               control={form.control}

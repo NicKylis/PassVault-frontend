@@ -36,7 +36,7 @@ import { usePasswords } from "@/context/PasswordContext";
 const passwordSchema = z.object({
   title: z.string().min(1, "Title is required"),
   username: z.string().min(1, "Username/Email is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   website: z
     .string()
     .optional()

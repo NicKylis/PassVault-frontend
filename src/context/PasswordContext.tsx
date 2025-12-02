@@ -43,6 +43,10 @@ type PasswordContextType = {
   getSharedUsers: (passwordId: string) => Promise<SharedUserEntry[]>;
 };
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 const PasswordContext = createContext<PasswordContextType>({
   passwords: [],
   refresh: async () => {},
@@ -57,7 +61,7 @@ const PasswordContext = createContext<PasswordContextType>({
 });
 
 export const PasswordProvider = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const [ownedPasswords, setOwnedPasswords] = useState<PasswordEntity[]>([]);
   const [sharedPasswords, setSharedPasswords] = useState<PasswordEntity[]>([]);
 
@@ -66,16 +70,18 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
     Record<string, SharedUserEntry[]>
   >({});
 
+  // Sync axios authorization header with token
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common["Authorization"];
     }
-  }, []);
+  }, [token]);
 
   const fetchPasswords = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/passwords");
+      const res = await api.get("/api/passwords");
       setOwnedPasswords(res.data.owned || []);
       setSharedPasswords(res.data.shared || []);
     } catch (err) {
@@ -108,10 +114,7 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
     >
   ) => {
     try {
-      await axios.post<PasswordEntity>(
-        "http://localhost:5000/api/passwords",
-        password
-      );
+      await api.post<PasswordEntity>("/api/passwords", password);
       fetchPasswords();
     } catch (err) {
       console.error("Failed to add password:", err);
@@ -137,10 +140,9 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       // Send API request (async, no need to wait for it to update UI)
-      await axios.patch(
-        `http://localhost:5000/api/passwords/${password.id}/favorite`,
-        { shared: password.shared }
-      );
+      await api.patch(`/api/passwords/${password.id}/favorite`, {
+        shared: password.shared,
+      });
       toast.success(
         `Password "${password.title}" ${
           password.favorite ? "removed from favorites" : "added to favorites"
@@ -156,7 +158,7 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
 
   const deletePassword = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/passwords/${id}`);
+      await api.delete(`/api/passwords/${id}`);
       fetchPasswords();
       toast.success("Password deleted successfully");
     } catch (err) {
@@ -170,7 +172,7 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
     updates: Partial<Omit<PasswordEntity, "id" | "createdAt" | "updatedAt">>
   ) => {
     try {
-      await axios.put(`http://localhost:5000/api/passwords/${id}`, updates);
+      await api.put(`/api/passwords/${id}`, updates);
       fetchPasswords();
     } catch (err) {
       console.error("Failed to edit password:", err);
@@ -185,8 +187,8 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
     const emailArray = Array.isArray(emails) ? emails : [emails];
 
     try {
-      const res = await axios.post<{ results: ShareResult[] }>(
-        `http://localhost:5000/api/passwords/${id}/share`,
+      const res = await api.post<{ results: ShareResult[] }>(
+        `/api/passwords/${id}/share`,
         { emails: emailArray }
       );
 
@@ -207,9 +209,7 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
 
   const removeSharedPassword = async (password: PasswordEntity) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/passwords/shared/${password.id}`
-      );
+      await api.delete(`/api/passwords/shared/${password.id}`);
       // remove shared users cache
       setSharedUsersMap((prev) => {
         const copy = { ...prev };
@@ -238,10 +238,9 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      await axios.patch(
-        `http://localhost:5000/api/passwords/${password.id}/use`,
-        { shared: password.shared }
-      );
+      await api.patch(`/api/passwords/${password.id}/use`, {
+        shared: password.shared,
+      });
     } catch (err) {
       console.error("Failed to mark password as used:", err);
       fetchPasswords();
@@ -252,9 +251,7 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
     if (sharedUsersMap[passwordId]) return sharedUsersMap[passwordId];
 
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/passwords/${passwordId}/shared-users`
-      );
+      const res = await api.get(`/api/passwords/${passwordId}/shared-users`);
       setSharedUsersMap((prev) => ({ ...prev, [passwordId]: res.data }));
       return res.data;
     } catch (err) {
@@ -264,10 +261,13 @@ export const PasswordProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) fetchPasswords();
-    else {
+    if (isAuthenticated) {
+      fetchPasswords();
+    } else {
+      // Clear all password data when logging out
       setOwnedPasswords([]);
       setSharedPasswords([]);
+      setSharedUsersMap({});
     }
   }, [isAuthenticated]);
 

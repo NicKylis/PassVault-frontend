@@ -26,6 +26,10 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
 });
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -41,9 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
         // Set default authorization header
-        axios.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${storedToken}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
       } catch (err) {
         console.error("Failed to restore auth state:", err);
         localStorage.removeItem("token");
@@ -56,10 +58,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await axios.post<{
+      const res = await api.post<{
         token: string;
         user: User;
-      }>("http://localhost:5000/login", {
+      }>("/login", {
         email,
         password,
       });
@@ -75,14 +77,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("user", JSON.stringify(newUser));
 
       // Set default authorization header
-      axios.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
     } catch (err) {
       // Clear auth state on error
       setToken(null);
       setUser(null);
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      delete axios.defaults.headers.common["Authorization"];
+      delete api.defaults.headers.common["Authorization"];
 
       throw err;
     }
@@ -94,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     sessionStorage.clear();
-    delete axios.defaults.headers.common["Authorization"];
+    delete api.defaults.headers.common["Authorization"];
   };
 
   return (

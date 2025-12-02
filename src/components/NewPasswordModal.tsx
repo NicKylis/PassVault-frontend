@@ -162,6 +162,7 @@ export const NewPasswordModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         aria-describedby="Add or edit a password"
+        data-testid="new-password-modal"
         className="bg-primary-foreground text-black max-w-md mx-4 max-h-[90vh] overflow-y-auto"
       >
         <DialogHeader>
@@ -185,6 +186,7 @@ export const NewPasswordModal = ({
                   <FormLabel>Title *</FormLabel>
                   <FormControl>
                     <Input
+                      data-testid="title-input"
                       placeholder="e.g., Google Account"
                       className="bg-primary-foreground border-ring"
                       {...field}
@@ -203,6 +205,7 @@ export const NewPasswordModal = ({
                   <FormLabel>Website</FormLabel>
                   <FormControl>
                     <Input
+                      data-testid="website-input"
                       placeholder="e.g., https://google.com"
                       className="bg-primary-foreground border-ring"
                       {...field}
@@ -221,6 +224,7 @@ export const NewPasswordModal = ({
                   <FormLabel>Username/Email *</FormLabel>
                   <FormControl>
                     <Input
+                      data-testid="username-input"
                       placeholder="your@email.com"
                       className="bg-primary-foreground border-ring"
                       {...field}
@@ -241,6 +245,7 @@ export const NewPasswordModal = ({
                     <FormControl>
                       <Input
                         type="text"
+                        data-testid="password-input"
                         placeholder=""
                         className="bg-primary-foreground border-ring flex-1 min-w-0"
                         {...field}
@@ -311,6 +316,7 @@ export const NewPasswordModal = ({
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea
+                      data-testid="notes-input"
                       placeholder="Additional notes..."
                       className="bg-primary-foreground border-ring"
                       rows={3}
@@ -331,7 +337,11 @@ export const NewPasswordModal = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" className="cursor-pointer">
+              <Button
+                type="submit"
+                data-testid="save-password-btn"
+                className="cursor-pointer"
+              >
                 {editingPassword ? "Update" : "Save"}
               </Button>
             </div>

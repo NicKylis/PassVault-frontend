@@ -17,6 +17,10 @@ import {
 } from "@/components/ui/form";
 import { useAuth } from "@/hooks/useAuth";
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 export const LoginPage = () => {
   const [register, setRegister] = useState(false); // New state for registration
   const navigate = useNavigate();
@@ -54,7 +58,7 @@ export const LoginPage = () => {
     try {
       if (register) {
         // Registration
-        await axios.post("http://localhost:5000/register", {
+        await api.post("/register", {
           name: data.name,
           email: data.email,
           password: data.password,

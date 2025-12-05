@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create local connection
+        run: npm run dev
+
       - name: Run cypress tests
         run: npm run cypress:run
 

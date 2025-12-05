@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Run cypress tests
-        run: cypress:run
+        run: npm run cypress:run
 
   deploy:
     needs: build

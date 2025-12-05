@@ -1,0 +1,44 @@
+name: CI - Passvault
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ${{ secrets.VITE_API_URL }}
+    steps:
+      # - name: Install libssl1.1
+      #   run: |
+      #     sudo add-apt-repository "deb http://security.ubuntu.com/ubuntu focal-security main"
+      #     sudo apt-get update
+      #     sudo apt-get install -y libssl1.1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run cypress tests
+        run: npx start-server-and-test "npm run dev" http://localhost:5173 "npm run cypress:run"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to Render
+        run: curl -X POST "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}

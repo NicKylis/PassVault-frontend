@@ -65,4 +65,41 @@ describe("Login and Add Password (intercepted APIs)", () => {
 
     cy.wait("@createPassword").its("response.statusCode").should("eq", 200);
   });
+  
+
+it("Logs In And Fails To Create A Password (Missing Parameters", () => {
+  cy.visit("/login");
+  cy.get('input[type="email"]').type("test@example.com");
+  cy.get('input[type="password"]').type("password123");
+  cy.contains("button", /login/i).click();
+
+  // cy.wait("@loginRequest").its("response.statusCode").should("eq", 200);
+
+  // cy.wait("@getPasswords");
+
+  cy.location("pathname").should("eq", "/");
+
+  // Open add password modal
+  cy.contains("Add New Password").click();
+
+  cy.get('[data-testid="new-password-modal"]', { timeout: 10000 })
+    .should("be.visible")
+    // Fix Cypress failing on body's pointer-events
+    .invoke("css", "pointer-events")
+    .should("not.equal", "none");
+
+  // Fill form fields
+  cy.get('[data-testid="title-input"]').type("Test Site");
+  cy.get('[data-testid="username-input"]').type("user@test.com");
+  // Skips the addition of Password value
+
+    // Submit
+    cy.get('[data-testid="save-password-btn"]').click();
+
+    // User is informed that the password they entered (void) is invalid
+    cy.get('[data-slot="form-message"]')
+    .should('be.visible')
+    .and('contain.text', 'Password must be at least 6 characters');
+
+});
 });

@@ -1,4 +1,6 @@
 # PassVault frontend
+[![Build Status](https://github.com/NicKylis/PassVault-frontend/actions/workflows/ci.yaml/badge.svg)](https://github.com/NicKylis/PassVault-frontend/actions)
+[![Website](https://img.shields.io/badge/Website-212121?style=flat&logo=render&logoColor=white)](https://passvault-frontend.onrender.com/)
 
 Passvault is a password manager application developed for the second course
 of Software Engineering at the Aristotle University of Thessaloniki. The frontend
@@ -27,6 +29,12 @@ npm i
 
 ```
 npm run dev
+```
+
+- run the tests with:
+
+```
+npm run cypress:run
 ```
 
 ### React + TypeScript + Vite template information

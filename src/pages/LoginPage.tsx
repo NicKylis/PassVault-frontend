@@ -114,7 +114,7 @@ export const LoginPage = () => {
                     <FormControl>
                       <Input
                         placeholder="John Doe"
-                        className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:bg-white"
+                        className="bg-gray-50 border-gray-300 focus:bg-white"
                         {...field}
                       />
                     </FormControl>
@@ -134,7 +134,7 @@ export const LoginPage = () => {
                     <Input
                       placeholder="you@example.com"
                       type="email"
-                      className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:bg-white"
+                      className="bg-gray-50 border-gray-300 focus:bg-white"
                       {...field}
                     />
                   </FormControl>
@@ -153,7 +153,7 @@ export const LoginPage = () => {
                     <Input
                       placeholder="Enter your password"
                       type="password"
-                      className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:bg-white"
+                      className="bg-gray-50 border-gray-300 focus:bg-white"
                       {...field}
                     />
                   </FormControl>
@@ -164,7 +164,7 @@ export const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
+              className="w-full bg-primary text-white font-semibold py-2"
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting
@@ -184,7 +184,7 @@ export const LoginPage = () => {
             <button
               type="button"
               onClick={() => setRegister(!register)}
-              className="text-blue-600 hover:underline font-medium"
+              className="text-primary hover:underline font-medium cursor-pointer"
             >
               {register ? "Login here" : "Register here"}
             </button>

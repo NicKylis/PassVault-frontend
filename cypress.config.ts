@@ -1,12 +1,16 @@
 import { defineConfig } from "cypress";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export default defineConfig({
   e2e: {
     baseUrl: "http://localhost:5173",
     specPattern: "cypress/e2e/**/*.{cy,spec}.{js,ts}",
     supportFile: "cypress/support/e2e.ts",
-    setupNodeEvents(on, config) {
-      // here you can register node listeners, plugins, etc.
+    env: {
+      TEST_EMAIL: process.env.TEST_EMAIL,
+      TEST_PASSWORD: process.env.TEST_PASSWORD,
     },
   },
 });

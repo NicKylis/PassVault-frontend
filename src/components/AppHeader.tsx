@@ -15,7 +15,8 @@ import {
 } from "./ui/dropdown-menu";
 
 const AppHeader = () => {
-  const { setQuery } = useContext(SearchContext);
+  // Searchbar reads/writes SearchContext directly
+  useContext(SearchContext);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -49,7 +50,7 @@ const AppHeader = () => {
 
       {/* Full-width searchbar on mobile / inline on Desktop */}
       <div className="w-full md:w-auto md:flex-1">
-        <Searchbar onSearch={setQuery} />
+        <Searchbar />
       </div>
 
       {/* Desktop Buttons */}

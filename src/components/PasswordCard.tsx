@@ -150,7 +150,10 @@ const PasswordCard = (password: PasswordEntity) => {
           setIsModalOpen(false);
         }}
       />
-      <Card className="bg-white shadow-md relative hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+      <Card
+        data-testid="password-entry"
+        className="bg-white shadow-md relative hover:shadow-lg transition-all duration-300 hover:border-primary/30"
+      >
         <CardHeader className="h-3">
           <CardTitle>
             <div className="flex items-center justify-between">
@@ -339,6 +342,7 @@ const PasswordCard = (password: PasswordEntity) => {
               </button>
             </span>
             <button
+              data-testid="copy-password-btn"
               className="cursor-pointer"
               onClick={() => handleCopy(password.password, "Password")}
             >

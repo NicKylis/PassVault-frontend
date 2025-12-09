@@ -1,8 +1,7 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import SecurityStatistics from "@/components/SecurityStatistics";
 import PasswordCard from "@/components/PasswordCard";
 import WhatsNew from "@/components/WhatsNew";
-import { SearchContext } from "./Layout";
 import { usePasswords } from "@/context/PasswordContext";
 import { Button } from "@/components/ui/button";
 import { NewPasswordModal } from "@/components/NewPasswordModal";
@@ -10,18 +9,9 @@ import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
-  const { query } = useContext(SearchContext);
   const { passwords } = usePasswords();
   const user = useAuth().user;
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const filtered = query
-    ? passwords.filter(
-        (p) =>
-          p.title.toLowerCase().includes(query.toLowerCase()) ||
-          p.category.toLowerCase().includes(query.toLowerCase())
-      )
-    : passwords;
 
   const recentlyUsed = [...passwords]
     .filter((p) => p.lastUsedAt)
@@ -30,25 +20,6 @@ const Dashboard = () => {
         new Date(b.lastUsedAt!).getTime() - new Date(a.lastUsedAt!).getTime()
     )
     .slice(0, 3);
-
-  if (query) {
-    return (
-      <div className="flex-1 pt-4 px-3 md:px-6">
-        <h1 className="text-2xl mb-4">Search Results</h1>
-        {filtered.length === 0 ? (
-          <div className="text-center text-muted-foreground">
-            No results found.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filtered.map((item) => (
-              <PasswordCard key={item.id} {...item} />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 pt-4 px-3 md:px-6 space-y-5">

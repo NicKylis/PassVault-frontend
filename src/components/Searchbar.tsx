@@ -1,27 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { X, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { SearchContext } from "@/pages/Layout";
 
-interface SearchbarProps {
-  onSearch: (query: string) => void;
-}
+const Searchbar = () => {
+  const { query, setQuery } = useContext(SearchContext);
+  const [searchQuery, setSearchQuery] = useState(query || "");
+  // No navigation: search filters in-place on the current page
 
-const Searchbar = ({ onSearch }: SearchbarProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  // Keep local input in sync when global query changes (e.g., from other components)
+  useEffect(() => {
+    setSearchQuery(query || "");
+  }, [query]);
 
   // Trigger search on input change or Enter key
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+    const v = event.target.value;
+    setSearchQuery(v);
+    // Live-update global query so search filters in-place across all pages immediately
+    setQuery(v.trim());
   };
 
   const handleClearSearch = () => {
     setSearchQuery("");
-    onSearch("");
+    setQuery("");
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSearch(searchQuery.trim());
+    const trimmed = searchQuery.trim();
+    setQuery(trimmed);
   };
 
   return (

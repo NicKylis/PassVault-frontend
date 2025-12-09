@@ -6,6 +6,7 @@ Cypress.on("uncaught:exception", () => {
 
 beforeEach(() => {
   // Global network intercepts
+  cy.clearLocalStorage();
   cy.intercept("GET", "**/api/passwords").as("getPasswords");
   cy.intercept("POST", "**/login").as("loginRequest");
   cy.intercept("POST", "**/api/passwords").as("createPassword");

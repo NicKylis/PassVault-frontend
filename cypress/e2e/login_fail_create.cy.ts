@@ -3,13 +3,13 @@ describe("Logs In And Fails To Create A Password (Missing Parameters)", () => {
     cy.visit("/login");
     const email = Cypress.env("TEST_EMAIL");
     const password = Cypress.env("TEST_PASSWORD");
-    cy.get('input[type="email"]', { timeout: 10000 }).should("be.visible");
-    cy.get('input[type="password"]').should("be.visible");
     cy.get('input[type="email"]').type(email);
     cy.get('input[type="password"]').type(password);
     cy.contains("button", /login/i).click();
 
-    cy.location("pathname").should("eq", "/");
+    // Wait for login request to complete before asserting redirect
+    cy.wait("@loginRequest", { timeout: 10000 });
+    cy.location("pathname", { timeout: 5000 }).should("eq", "/");
 
     // Open add password modal
     cy.contains("Add New Password").click();

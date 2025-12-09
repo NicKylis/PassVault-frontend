@@ -5,8 +5,15 @@ Cypress.on("uncaught:exception", () => {
 });
 
 beforeEach(() => {
-  // Global network intercepts
+  // clear cookies and local storage
+  cy.clearCookies();
   cy.clearLocalStorage();
+
+  // clear session storage
+  cy.window().then((win) => {
+    win.sessionStorage.clear();
+  });
+  // Global network intercepts
   cy.intercept("GET", "**/api/passwords").as("getPasswords");
   cy.intercept("POST", "**/login").as("loginRequest");
   cy.intercept("POST", "**/api/passwords").as("createPassword");

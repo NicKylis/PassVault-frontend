@@ -20,12 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  useLocation,
-  Link,
-  useSearchParams,
-  useNavigate,
-} from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { CategoryList } from "@/types/CategoryList";
 import logo from "/logo.png";
 import { type ElementType } from "react";
@@ -86,7 +81,7 @@ export function AppSidebar() {
           <SidebarMenuButton
             asChild
             isActive={isItemActive(item)}
-            className="flex items-center gap-2 w-full text-left"
+            className="flex items-center gap-2 w-full text-left cursor-pointer"
           >
             {item.title === "Logout" ? (
               <button
@@ -109,10 +104,14 @@ export function AppSidebar() {
           </SidebarMenuButton>
         ) : (
           <SidebarMenuButton asChild isActive={isItemActive(item)}>
-            <Link to={item.url} className="flex items-center gap-2 w-full">
+            <button
+              type="button"
+              onClick={() => navigate(item.url)}
+              className="flex items-center gap-2 w-full text-left cursor-pointer"
+            >
               <item.icon />
               <span>{item.title}</span>
-            </Link>
+            </button>
           </SidebarMenuButton>
         )}
       </SidebarMenuItem>
@@ -122,19 +121,23 @@ export function AppSidebar() {
     <>
       <Sidebar>
         <SidebarHeader>
-          <Link to="/">
-            <div className="flex items-center gap-2 px-4 py-2">
-              <div className="flex h-10 w-10 items-center justify-center">
-                <img src={logo} alt="Logo" className="h-10 w-10" />
-              </div>
-              <div className="grid flex-1 text-left text-lg leading-tight">
-                <span className="truncate font-semibold">
-                  <span className="text-primary">Pass</span>
-                  <span>Vault</span>
-                </span>
-              </div>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => navigate("/")}
+            onKeyDown={(e) => e.key === "Enter" && navigate("/")}
+            className="flex items-center gap-2 px-4 py-2 cursor-pointer"
+          >
+            <div className="flex h-10 w-10 items-center justify-center">
+              <img src={logo} alt="Logo" className="h-10 w-10" />
             </div>
-          </Link>
+            <div className="grid flex-1 text-left text-lg leading-tight">
+              <span className="truncate font-semibold">
+                <span className="text-primary">Pass</span>
+                <span>Vault</span>
+              </span>
+            </div>
+          </div>
         </SidebarHeader>
 
         <SidebarContent>
@@ -154,13 +157,18 @@ export function AppSidebar() {
                       asChild
                       isActive={activeCategory === item.title.toLowerCase()}
                     >
-                      <Link
-                        to={`/view-all?category=${item.title.toLowerCase()}`}
-                        className="flex items-center gap-2 w-full"
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/view-all?category=${item.title.toLowerCase()}`
+                          )
+                        }
+                        className="flex items-center gap-2 w-full text-left cursor-pointer"
                       >
                         <item.icon />
                         <span>{item.title}</span>
-                      </Link>
+                      </button>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
